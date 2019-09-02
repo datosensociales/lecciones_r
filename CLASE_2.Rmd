@@ -1,0 +1,307 @@
+---
+title: "CLASE 2"
+author: 
+date: "August 1, 2019"
+output: github_document
+---
+
+
+## DATOS Y OBJETOS
+
+### DATOS
+
+Empezamos este curso viendo que tipo de datos tenemos en R.
+
+Los datos mas comunes -y los que vamos a usar en este curso- son tres:
+__Numericos__ (_numerics_)
+__Caracteres__ (_character_)
+__Vectoriales__ (_vectors_)
+
+Para saber que tipo de datos tenemos en un _dataframe_ o en un _objeto_, es fundamental la funcion __CLASS__
+
+Por ejemplo, al ver numericos o categoricos:
+
+```{r setup, include=FALSE}
+class(3)
+class ("arbol")
+```
+
+Noten que puse _arbol_ entre comillas. Esto es fundamental, ya que es una forma de identificar un _character_. Por ejemplo, si elijo un numero y lo pongo entre comillas...
+
+```{r}
+class("3")
+```
+
+Estos tipos de datos son los mas importantes. __R__ puede ser usado como una calculadora de datos numericos:
+
+```{r}
+40/4
+30+34*12-15
+sqrt(9)
+```
+
+### Objetos
+
+Antes de ver el tercer tipo de datos, tenemos que deternos a conocer los __objetos__. Ellos son lo que en otros programas son llamados __variables__. Basicamente constituyen un elemento al que le asignamos valores. Aparecera en nuestro _Enviroment_ y lo hacemos usando el comando `<-`
+
+```{r}
+x <- 45
+```
+
+Ya lo asignamos y aparece en el Enviroment. Para que aparezca en nuestro Script, debemos "llamarlo"
+
+```{r}
+x
+```
+
+Una vez hecho esto, el _x_ tendrá SIEMPRE ese valor de 45. __SALVO__ que asignemos mas abajo otro valor de nombre _x_. Asi se pueden hacer cuentas de este estilo:
+
+```{r}
+sqrt(x)
+x-40
+x/2 + 50
+```
+
+La raiz cuadrada __sqrt()__ de 45 deja muchos decimales. Se puede reducir? CLARO! Si tenemos esa duda, googleamos la pregunta y nos va a decir que usemos __round__.
+
+```{r}
+sqrt(x)
+round(sqrt(x))
+```
+
+El resultado da 7. Si lo queremos con un par de decimales, podemos pedirlo. Googleamos o vamos a la parte de la consola y ponemos ?round. Este signo de pregunta nos va a abrir el panel "help" y nos explica cuales son los atributos de la funcion. Digamos que lo quiero con dos decimales:
+
+```{r}
+round(sqrt(x), 2)
+```
+
+Veamos el largo que posee el siguiente objeto de __class()__ _character_
+
+```{r}
+y <- "en el medio del camino de nuestra vida, me encontre en una selva oscura"
+length(y)
+```
+
+¿Por qué [1]? Porque considera que es un solo valor, sin importar su extension. Una coleccion de datos del mismo tipo es lo que se conoce como un __VECTOR__ que es lo que veremos a continuacion. Para construir un vector, debemos crear un objeto y los valores ponerlos despues de _c()_
+
+### Vectores numéricos 
+
+```{r}
+VecNum <- c(32, 33, 36, 45, 68, 87, 90, 120, 122, 145, 178)
+
+class(VecNum)
+
+length(VecNum)
+```
+
+Como podemos ver, nuestro vector es numérico y el objeto esta compuesto por distintos valores que ahora se puede diferenciar. Por ejemplo, ¿cómo selecciono el cuarto valor?
+
+```{r}
+VecNum[4]
+```
+
+Mostrame desde el primer valor al sexto
+
+```{r}
+VecNum[1:6]
+```
+
+Sumemos "15" a los valores
+
+```{r}
+VecNum+15
+```
+
+Restemos "15"
+
+```{r}
+VecNum-15
+```
+
+¿Cuántos valores tenemos en total?
+
+```{r}
+length(VecNum)
+```
+
+Si usamos la funcion head nos da los primeros 6 valores. La funcion "tail" es para que nos muestre los ultimos 6. 
+
+```{r}
+head(VecNum)
+tail(VecNum)
+```
+
+Dame todos los valores menos el segundo (33)
+
+```{r}
+VecNum-33
+```
+
+¿Qué pasa? Esta interpretando que debo restarle 33 a TODOS los valores! Lo que tengo que hacer es que me reste el SEGUNDO valor (que es 33) y poner entre corchetes para que sepa que quiero sacar esa variable
+
+```{r}
+VecNum [-2]
+```
+
+Quiero cambiar el octavo numero de la lista por "121"
+
+```{r}
+VecNum[8] <- 121
+VecNum
+```
+
+Si quiero verlo en formato de tabla y fuera de este panel utilizamos la función `View()`. Nos lo abre en otra "pestaña"
+View(VecNum)
+
+### Vectores lógicos
+
+Otros tipos de vectores son los logicos o booleanos. Estos son fundamentales para saber si un valores es _verdadero_(TRUE) o _falso_(FALSE) segun la funcion que le pidamos. Mas adelante veremos que es fundamental para usar, por ejemplo, las funciones del paquete __tidyverse__.
+
+Digamos que quiero saber cuáles son los valores de mi Objeto mayores de 40.
+
+```{r}
+VectorLogico <- VecNum >= 40
+VectorLogico
+class(VectorLogico)
+```
+
+Los operadores lógicos son: 
+
+__MAYOR A__ > _y_ >=
+__MENOR A__ < _y_ <=
+__IGUAL A__ == _atencion con el doble igual_
+__DISTINTO A__ != 
+__VALOR Y OTRO VALOR__ &
+__VALOR U OTRO VALOR__ |
+
+Se puede hacer con dos vectores también: 
+
+```{r}
+VecNum2 <- c(32, 33, 36, 45, 70, 94, 100, 120, 122, 158, 179)
+
+VecNum == VecNum2
+```
+
+### Vectores de caracteres (__strings__)
+
+Ademas de _numericos_ podemos armar vectores de caracteres o __strings__
+
+```{r}
+VectorString <- c("perro", "gato", "raton", "pajaro", "pez")
+
+length(VectorString)
+class(VectorString)
+```
+
+Por ejemplo, queremos elegir la inicial de cada animal para usarla despues. Usamos __substr()__
+
+```{r}
+substr(VectorString, start= 1, stop = 1)
+```
+
+Con las indicaciones de "start" y "stop" le indicamos cu?ntas letras queremos que nos muestre de cada palabra. POr ejemplo: 
+
+```{r}
+substr(VectorString, start = 1, stop = 2)
+substr(VectorString, start = 1, stop = 3)
+```
+
+Con __grep__ tomamos algunos valores de los vectores character. 
+
+```{r}
+VectorString[grep(pattern = "r", x = VectorString)]
+```
+
+Hagamos un nuevo objeto con los animales con "r"
+
+```{r}
+ConR <- VectorString[grep(pattern = "r", x = VectorString)]
+ConR
+```
+
+## Valores NA
+
+Muchas veces, al abrir un archivo o __dataset__ (lo veremos en la Clase_2), puede ser que tengamos _missing values_, es decir, que no haya valores. Esto en R se representa con un __NA__. El problema con este valor es que puede afectar las funciones que queramos realizar, como la sumatoria de todo, el promedio, el valor maximo, etc. Por lo tanto, muchas veces debemos saltear, sacar o asignar un nuevo valor al __NA__. ?Como lo hacemos?
+
+Por ejemplo, el siguiente vector contiene una serie de precios con un _missing value_:
+
+```{r}
+precios <- c(25, 67, 21, 54, 899, 23, NA, 34, 56)
+```
+
+Veamos que pasa si pedimos la sumatoria de precios, el valor maximo y el promedio:
+
+```{r}
+sum(precios)
+max(precios)
+mean(precios)
+```
+
+Primero vamos a __ignorar__ el valor __NA__ usando _na.rm_:
+
+```{r}
+sum(precios, na.rm = TRUE)
+max(precios, na.rm = TRUE)
+mean(precios, na.rm = TRUE)
+round(mean(precios, na.rm = TRUE)) #Practicamos el round ;) 
+```
+
+Ahora bien, supongamos que tenemos muchos __NA__ en nuestro dataset y queremos sacarlos para que no interfieran con nuestro análisis. Vamos a usar __is.na__ que es la funcion para identificar los __NA__ PERO vamos a agregarle el "!" que, como vimos es la funcion logica de "lo distinto a". Así, estamos diciendo "selecciona lo distinto a NA".  
+
+Selecciona cuando "es" -is- NA
+
+```{r}
+precios[is.na(precios)]
+```
+
+Ahora seleccionamos lo "diferente" a is.na
+
+```{r}
+precios[!is.na(precios)]
+```
+
+Para tenerlo en un dataset, podemos asignarlo a un objeto: 
+
+```{r}
+precios_sin_NA <- precios[!is.na(precios)]
+
+precios_sin_NA
+```
+
+
+Por ultimo, a veces es necesario no eliminar el NA sino reemplazarlo por otro valor, generalmente 0. ?Como hacemos esto? Sencillamente, en lugar de construir un objeto nuevo, le pedimos que modifique algo de uno ya existente. 
+Identificamos los NA con is.na y pedimos que cambie los de "PRECIOS" por 0.
+
+```{r}
+precios[is.na(precios)] = 0
+
+precios
+```
+
+Eso es todo por hoy!!!!!!!
+
+> ## Exercise
+>
+> 1. Using this vector of rooms, create a new vector with the NAs removed.
+>
+>     ```r
+>     rooms <- c(1, 2, 1, 1, NA, 3, 1, 3, 2, 1, 1, 8, 3, 1, NA, 1)
+>     ```
+> 2. Use the function `median()` to calculate the median of the `rooms` vector.
+>
+> 3. Use R to figure out how many households in the set use more than 2 rooms for sleeping.
+>
+> > ## Solution
+> > ```{r, answer=TRUE}
+> > rooms <- c(1, 2, 1, 1, NA, 3, 1, 3, 2, 1, 1, 8, 3, 1, NA, 1)
+> > rooms_no_na <- rooms[!is.na(rooms)]
+> > # or
+> > rooms_no_na <- na.omit(rooms)
+> > # 2.
+> > median(rooms, na.rm = TRUE)
+> > # 3.
+> > rooms_above_2 <- rooms_no_na[rooms_no_na > 2]
+> > length(rooms_above_2)
+> > ```
+> {: .solution}
+{: .challenge}

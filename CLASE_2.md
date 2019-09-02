@@ -448,3 +448,41 @@ precios
     ## [1]  25  67  21  54 899  23   0  34  56
 
 Eso es todo por hoy\!\!\!\!\!\!\!
+
+> ## Exercise
+> 
+> 1.  Using this vector of rooms, create a new vector with the NAs
+>     removed.
+>     
+>     ``` r
+>     rooms <- c(1, 2, 1, 1, NA, 3, 1, 3, 2, 1, 1, 8, 3, 1, NA, 1)
+>     ```
+> 
+> 2.  Use the function `median()` to calculate the median of the `rooms`
+>     vector.
+> 
+> 3.  Use R to figure out how many households in the set use more than 2
+>     rooms for sleeping.
+> 
+> > ## Solution
+> > 
+> > ``` r
+> > rooms <- c(1, 2, 1, 1, NA, 3, 1, 3, 2, 1, 1, 8, 3, 1, NA, 1)
+> > rooms_no_na <- rooms[!is.na(rooms)]
+> > # or
+> > rooms_no_na <- na.omit(rooms)
+> > # 2.
+> > median(rooms, na.rm = TRUE)
+> > ```
+> > 
+> >     ## [1] 1
+> > 
+> > ``` r
+> > # 3.
+> > rooms_above_2 <- rooms_no_na[rooms_no_na > 2]
+> > length(rooms_above_2)
+> > ```
+> > 
+> >     ## [1] 4
+> > 
+> > {: .solution} {: .challenge}

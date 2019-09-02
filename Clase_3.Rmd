@@ -1,0 +1,205 @@
+---
+title: "DataSoc - Clase 3"
+author: "Arrancando con Datos"
+date: "Agosto de 2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Presentación del Dataset
+
+Recordemos siempre antes de comenzar con R debemos convocar a los paquetes que contienen las funciones necesarias para el manipuleo de datos con el comando **library()**. 
+
+```{r}
+# Llamamos a los paquetes 
+library(datos)
+library(tidyverse)
+
+# Descargamos el dataset "encuesta"
+encuesta <- datos::encuesta
+```
+
+Con esto el conjunto de datos queda cargado en memoria. Si en lugar de tomar un conjunto de datos de una librería de R lo tuviésemos que leer desde un archivo `csv` deberíamos utilizar la función **read_csv()**. 
+
+```{r, eval=FALSE}
+encuesta <- read_csv(file = "encuesta.csv")
+```
+
+A través de deste comando creamos el dataframe. Podemos ver el contenido del mismo escribiendo el nombre del _df_.
+
+```{r}
+encuesta
+## Proba también 
+## View(encuesta)
+## head(encuesta)
+```
+
+**NOTA!**
+La función **read_csv()** asume que los campos se hallan delineados por comas, sin embargo, en varios países se utiliza el punto y coma(;) como delimitador. En caso de que quieras leer archivos de este tipo en R puedes usar la función **read_csv2**. Para más información escribe **?read_csv** en tu consola.
+
+
+## ¿Qué son los _dataframes_?  
+
+Los _dataframe_ son la estructura de facto para datos tabulares en R, y lo que usamos para el procesamiento de datos, estadísticas y trazado. 
+
+Un **_df_** es la representación de datos en formato de tabla donde las columnas son vectores que tienen todos el mismo largo. Dado a que las columnas a su vez son vectores, cada una de ellas debe contener un solo _tipo de dato_ (caracter, numeric, etc...).  
+
+<p align="center">
+  <img src="static/data-frame.svg">
+</p>
+
+Un _df_ puede ser creado a mano pero usualmente se generan mediantes las funciones **read_csv()** o **read_table**.
+
+Un **tibble** es una extensión de R data frames utilizado por _tidyverse_. Cuando leemos el dataset utilizando **read_csv** suele guardarse en objetos de clase **tbl_df**, **tbl** y **data.frame**. Puedes ver la clase de un objeto mediante:  
+
+```{r}
+class(encuesta)
+```
+
+## Inspeccionando el data frame  
+
+Cuando llamamos a un objeto de tipo **tbl_df**, como en este caso, podemos observar la cantidad de información que este nos indica, tal como el numero de filas y columnas, o mismo la clase de dato dentro d cada columna. A su vez R contiene una variada cantidad de funciones que nos permite extraer información del data frame. 
+
+### Tamaño  
+
+- **dim()**: devuelve un vector con el número de filas dentro del primer elemento, y el número de columnas del segundo elemento (las _dimensines_ del objeto)
+- **nrow()**: devuelve el número de filas
+- **ncol()**: devuelve el número de columnas
+
+### Contenido  
+
+- **head()**: muestra el contenido de las primeras 6 filas
+- **tail()**: muestra el contenido de las ultimas 6 filas
+
+### Nombres  
+
+- **names()**: devuelve el nombre de las columnas
+
+### Resumen  
+
+- **str()**: devuelve la estructura e info. del objeto rspecto de la clase, largo y contenido de cada columna
+- **summary()**: devuelve un informe estadístico de cada columna
+
+##  Indexación y subconjunto de data frame  
+
+Nuestro marco de datos de _encuesta_ se compone de filas y columnas (2 dimensiones). Si queremos extraer datos precisos debemos especificar las coordenadas de lo que estamos buscando. El número de filas viene primero, seguido del número de columnas. Sin embargo, observemos que las diferentes maneras de especificar coordenadas nos devuelve resultados con diferente clases.
+
+```{r}
+## Primer elemento de la primera columna del df (en formato de vector)
+encuesta [1, 1]
+```
+
+```{r}
+## Primer elemento de la columna n° 6 (en formato de vector)
+encuesta [1, 6]
+```
+
+```{r}
+## Pimera columna del df (en formato de data.frame)
+encuesta[1]
+```
+
+```{r}
+## Primeros 3 elementos de la 7ma columna (en formato de vector)
+encuesta[1:3, 7]
+```
+
+```{r}
+## Tercera fila del df (en formato de data.frame)
+encuesta[3, ]
+```
+
+```{r}
+## Equivalente a head_encuesta <- head(encuesta)
+head_encuesta <- encuesta[1:6, ]
+```
+
+**:** es una función especial que crea vectores numéricos de números integros, ya sea en orden creciente o decreciente. Prueba con **1:10** y **10:1**.
+También puedes excluir ciertos datos del data frame usando el signo: "**-**":
+
+```{r}
+encuesta[, -1]  # Devuelve todo el data.frame, excepto por la primera columna
+```
+
+Como bien vimos previamente se puede crear subconjunto de datos llamando los índices, pero también podemos llamarlos por los nombres de columna directamente.
+
+```{r include=FALSE}
+encuesta["estado_civil"]     # Resultado es un data.frame
+encuesta[, "estado_civil"]   # Resultado es un data.frame
+encuesta[["estado_civil"]]   # Resultado es un vector
+encuesta$estado_civil        # Resultado es un vector
+```
+
+## Factores  
+
+R tiene una clase especial de datos, llamados _factores_, que nos sirve para el manejo de datos categóricos al momento de realizar gráficos o mismo analisis estadísticos. Los _factores_ son muy prácticos y contribuyen haciendo a R adecuado para el trabajo con datos.
+Los _factores_ representan datos categóricos. Se almacenan como _íntegros_ asociados a etiquetas que pueden ser ordenados o desordenados. Mientras que los factores suelen ser vistos como vectores de _caracter_, en realidad se los trata como un vector de _íntegros_. Debido esto hay que ser muy cuidadosos cuando se los trata como _strings_.
+
+```{r}
+raza <- factor(c("Negra", "Blanca", "Otra"))
+```
+
+R automaticamente asigna **1** al nivel "Blanca" y **2** al nivel "Negra", ya que la **B** viene antes de la **N**. Puedes observar esto utilizando la función **levels()** y puedes hallar el n° de niveles usando **nlevels()**:
+
+```{r}
+levels(raza)
+```
+
+```{r}
+nlevels(raza)
+```
+
+Usualmente el orden de los factores no importa, en algunos casos conviene especificar un determinado orden, dado que puede ser más comodo y mejora nuestra visualización para un determinado tipo de análisis. Un modo de reordenar los niveles puede ser:
+
+```{r}
+raza <- factor(raza, levels = c("Negra","Blanca"))
+raza  # Después de reordenar
+```
+
+En la memoria de R estos factores se representan como _íntegros_ (1, 2). Esto suele ser de gran ayuda cuando se trabaja con una alta cantidad de niveles. Supongamos que cometimos un error y necesitamos renombrar "Blanca" a "Blanco":
+
+```{r}
+levels(raza)[2] <- "Blanco"
+levels(raza)
+```
+
+```{r}
+raza
+```
+
+## Convirtiendo Factores
+En caso de que necesitemos convertir un factor a un vector de clase _caracter_, utilizamos la función **as.character(x)**:
+
+```{r}
+as.character(raza)
+```
+
+Convertir factores en que los niveles aparecen como números en un vector numerico puede ser más engañoso. La función de **as.numeric** devuelve los valores del factor, no sus niveles. Entonces cuidado, esto nos puede devolver un set nuevo de numeros, indeseado en este caso. Un modo de evadir esta situación es convirtiendo, en primer lugar, los factores en _caracteres_, y luego en números. 
+```{r}
+anio <- factor(c(2000, 2001, 2002, 2003, 2004, 2006))
+as.numeric(anio)    # Error! Y la consola no nos avisa
+```
+
+```{r}
+as.numeric(as.character(anio))    # Ahora si
+```
+
+```{r}
+as.numeric(levels(anio))[anio]    # Forma recomendada
+```
+
+## Renombrando factores
+Cuando el data se encuentra almacenado como _factor_, puedes utilizar la función **plot()** para generar una rápida visualización de las observaciones representadas en cada nivel de factor. 
+
+```{r}
+partido <- encuesta$partido    # Creamos un vector de la columna "partido" del data.frame
+partido <- as.factor(partido)  # Lo convertimos en factor
+partido[1:10]
+```
+
+```{r}
+plot(partido, cex.names=.6, las=3)
+```
