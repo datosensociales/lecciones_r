@@ -2,8 +2,12 @@
 
 R Studio es un _entorno de desarrollo integrado_ (iDE en su sigla en inglés) para el lenguaje de programación R. Por este motivo, para poder utilizar el RStudio debemos instalar también el R. Lo importante del lenguaje R es que es un __software libre y gratuito y de código abierto__. 
 
-![](/static/logosR.png)
-
+<center>  
+  
+![](/static/logosR.png)  
+  
+</center>  
+  
 El __IDE__ permite escribir un script o código, navegar los archivos guardados en la computadura, revisar las varibales creadas, visualizar, desarrollar librerias. De esta forma, la ventaja de utilizar __R__ es que _toda_ la información que necesitamos para escribir el código, lo tenemos en una misma "ventana"
 
 Estas condiciones han fomentado el desarrollo de una gran cantidad de usuarios y desarrolladores. Además, los usuarios de R pueden crear y corregir “bugs” de paquetes (veremos qué son a continuación). 
