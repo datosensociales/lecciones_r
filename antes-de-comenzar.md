@@ -42,9 +42,9 @@ Tanto R como RStudio se bajan de las siguientes páginas web:
 ### Los cuatro paneles
 Ahora bien, ¿con qué nos encontramos al abrir RStudio? El programa está compuesto de 4 paneles fundamentales. 
 
-<center>
-![](static/panelRstudio.png)
-</center>
+<p align="center">
+  <img width="600" height="200" src="/static/panelRstudio.png">
+</p>
 
 __Panel de edición__: es el script donde vamos a trabajar y desarrollar nuestros códigos. Es el único que no aparece al abrir el RStudio. Para crearlo debemos ir al logo del archivo con un __+ verde__. De ahí utilizaremos dos tipos de archivo: __R Script__ y __R Markdown__.
 
