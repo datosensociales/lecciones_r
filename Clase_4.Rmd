@@ -1,0 +1,307 @@
+---
+title: "Clase 4"
+author: "Manuel Zapico y Sofia Santamarina"  
+date: "August 29, 2019"
+output: github_document
+---
+```{r, include=FALSE}
+setwd("C:/Users/marti/Documents/lecciones_r/")
+knitr::opts_chunk$set(message = FALSE)
+```
+
+# Paquetes dplyr y tidyr
+
+Hoy presentamos dos paquetes de R que facilitan la limpieza y manipulacion de datos: __dplyr__ y __tidyr__. 
+
+Primero traemos el paquete que vamos a usar desde nuestra _library_
+
+```{r}
+library(tidyverse)
+```
+
+En este trabajo, vamos a usar una _base de datos_ del sitio Gapminder.
+
+https://www.gapminder.org/
+
+La base de datos llamada __base_exp__ que vamos compara el PBI per capita y la expectativa de vida (o __esperanza de vida__). Los datos son los siguientes:
+
+      Pais
+      Year
+      Expectativa de vida
+      Poblacion
+      PBI_PC
+
+Pero tambien vamos a querer saber a que continente pertenece cada pais. Por eso, necesitamos la base llamada __continente__. 
+
+Primero cargamos los datasets. (Tranqui! Al final de esta leccion vamos a ver como hacer esto)
+
+```{r}
+base_exp <- read_csv("Clase_4_files/base_exp.csv")
+continente <- read_csv("Clase_4_files/continente.csv")
+```
+
+¿Cómo podemos ver este dataset? Para empezar a ver algo, podemos pedir que nos de un resumen
+
+```{r}
+summary(base_exp)
+```
+
+### Uniendo las bases = join
+
+Antes de empezar, queremos unificar la Base con la esperanza de vida y la de los continentes. Para eso usamos __join__. ?Que variable usamos para unir? La que compartan las dos bases de datos: _pais_.
+
+```{r}
+gapminder <- left_join(base_exp, continente)
+
+head(gapminder)
+```
+
+Listo! Ya podemos empezar a pulir los datos. 
+
+
+## Las funciones de tidyverse
+
+Ahora vamos a ver las funciones de _tidyverse_ que podemos usar para manejar nuestros datos. Las principales son las siguientes:
+
+      select
+      filter
+      mutate
+      group_by
+      summarize
+      arrange
+
+## Seleccionar columnas = select
+
+La primera funcion es __select__. Con ella, lo que vamos a hacer es elegir __columnas__. 
+
+Por ejemplo, queremos ver solamente el cambio de _poblacion_ para cada _pais_ segun los _años_.
+
+```{r include=FALSE}
+
+#Primero elegimos la funcion. Entre parentesis, primero indicamos la base de datos y despues las columnas que necesitemos.
+
+select(gapminder, pais, year, pobl)
+
+```
+
+Aplicamos la funcion pero no la asignamos a nada. Queremos tener una nueva base con esa seleccion, por eso, creamos un nuevo dataframe:
+
+```{r}
+pais_pob <- select(gapminder, pais, year, pobl)
+```
+
+Podemos ver que en el _Enviroment_ el dataframe __pais_pob__ tiene tres variables en lugar de las seis originales. 
+
+## Filtrar filas = filter
+
+A continuacion vamos a usar __filter__. Esta funcion sirve para elegir filas a partir de determinada condicion. Despues, veremos que podemos ser mas especificos. 
+
+### Filtramos datos
+
+Busquemos los datos de Argentina. 
+
+```{r}
+#Armamos un dataframe llamado "Argentina". Escribimos la funcion "filter", luego la base de datos de origen, la columna que contiene el dato que queremos -"pais"- y el nombre entre comillas. El pedido de la columna es con doble igual (==). Ahora veremos por que. 
+
+argentina <- filter(gapminder, pais == "Argentina")
+
+#¿y America? Si ponemos "America", no va a pasar nada. Porque en el dataset se llama "Americas". Tiene que ser exacto el pedido y siempre entre comillas.
+
+america <- filter(gapminder, continente == "Americas")
+```
+
+Ya tenemos dos nuveas bases: una con datos de Argentina y otra con datos de America. Pero, si quiero elegir por ejemplo de que manera cambio la poblacion en America despues de 1990?
+
+### Funciones logicas de filter 
+
+Para llevar a cabo comparaciones o filtrar a partir de atributo mas especificos, podemos usar los siguientes valores:
+
+    == igual a 
+    != distinto a
+    > mayor que 
+    >= mayor igual que
+    < menor que
+    <= menor igual que
+    & y
+    | o
+
+__NOTA!__: es comun equivocar el "==" con el "=". El "=" es utilizado para asignar. Por ejemplo __pais="Argentina"__ significa asignar el valor _Argentina_ en la variable _pais_. En cambio, si quiero que me devuelva el valor de pais que ya sea igual a Argentina, tenemos que usar "==".
+
+Volvamos a nuestro pedido. Queremos filtrar la poblacion de America despues de 1990. Simplemente hacemos lo siguiente:
+
+```{r}
+argentina_90 <- filter(gapminder, pais == "Argentina", year >= 1990)
+```
+
+FACIL!
+
+Quiero los paises con mas de 100 millones de habitantes:
+
+```{r}
+mas_habitantes <- filter(gapminder, pobl > 100000000)
+
+```
+
+Mas de 100 millones de personas de Asia __o__ America.
+
+```{r}
+am_as_poblados <- filter(gapminder, 
+                         continente == "Americas" | continente =="Asia", 
+                         pobl > 100000000)
+```
+
+De esos dos continentes que tienen 100 millones de personas desde antes de 1980
+
+```{r}
+am_as_pob_1980 <- filter(gapminder, 
+                         continente == "Americas" | continente =="Asia", 
+                         year <= 1980, pobl > 100000000)
+```
+
+Pasame todos los paises menos Estados Unidos
+
+```{r}
+menos_eeuu <- filter(gapminder, pais != "United States")
+```
+
+Último! Paises que antes de 1970 tenian un expectativa de vida mayor a 73 años, y que no sea Estados Unidos
+
+```{r}
+exp_vida_1950 <- filter(gapminder, pais != "United States", year <= 1970, expVida > 73)
+```
+
+
+## Pipe %>% 
+
+Ya vimos dos funciones, por lo que podemos ver el __pipe__! Esto simplifica nuestra vida. En lugar de tener que hacer funciones anidadas, solo tenemos que poner SHIFT+CTRL+M. Esto genera el simbolo __%>%__, que permite unir las funciones que vamos a pedir. Se llama "pipe", literalmente significa "tubo". Es como decir "despues esto": select %>% filter, seria "select y despues filer"
+
+Por ejemplo, seleccionamos las columnas pais, poblacion y a?o __y despues__ filtramos años mas de 2000 para poblacion de menos de 10 millones.
+
+```{r}
+#Cada funcion lo hacemos en un nuevo "renglon" para facilitar la lectura.
+
+para_pipe <- select(gapminder, pais, pobl, year) %>% 
+    filter(year > 1990, pobl <10000000)
+head(para_pipe)
+```
+
+Tambien, para simplificar mas, podemos poner el dataframe y el pipe para despues hacer las funciones. 
+
+```{r}
+para_pipe <- gapminder %>% 
+                      select(pais, pobl, year) %>% 
+                      filter(year > 1990, pobl <10000000)
+
+head(para_pipe)
+```
+
+
+## Agregar nueva columna con cambios de datos = mutate
+
+Con mutate creamos una nueva columna con datos nuevos o utilizando algunos de los datos que ya tenemos en la base de datos.
+
+Por ejemplo, quiero conocer el PBI de un pais. Tenemos el __PBI per capita__ y la cantidad de poblacion. Por eso, tenemos que multiplicar ambos datos para conocer cual es el __PBI TOTAL__
+
+```{r}
+pbi_total <- mutate(gapminder, PBI_TOTAL = pobl*PBI_PC)
+
+head(pbi_total)
+```
+
+
+## Agrupar y combinar datos
+
+Tambien podemos obtener _resumenes_ del dataset. Para eso usamos __summarise__. 
+
+Por ejemplo, quiero conocer el promedio de vida de todos los datos del dataset.
+
+```{r}
+summarise(gapminder, mean(expVida))
+```
+
+La expectativa de vida, como podemos ver, es casi 60 años. Pero lo mejor del __summarise__ es poder combinarlo. Por ejemplo, queremos el promedio expectativa de vida segun pais. 
+
+```{r}
+media_vida_pais <- gapminder %>% 
+    group_by(pais) %>% 
+    summarise(mean(expVida))
+media_vida_pais
+
+```
+
+¿Y el valor máximo de __Esperanza de vida__ que ha alcanzado cada continente?
+
+```{r}
+gapminder %>%  group_by(continente) %>% 
+                  summarise(max(expVida))
+```
+
+También podemos combinar el __group_by__ con __arrange__. Este último _ordena_ los datos.
+
+Por ejemplo, ordenamos por Expectativa o Esperanza de Vida.
+
+```{r}
+gapminder %>% 
+    arrange(expVida) %>% head()
+```
+
+Vemos que Rwanda es el pais con expectativa de vida mas bajo en 1992 con 23 años! Tiene sentido? Claro: Rwanda enfrentó una crisis alimentaria a fines de la decada de 1980; estuvo en guerra a principios de 1990 y tuvo distintos conflictos internos que terminarian en el genocidio de 1994. La mayoria de los países con esperanza mas baja estuvieron en guerra en esos años...y son todos de Africa y Asia. 
+
+Si nos enfocamos en Rwanda, podemos ver que la decada de 1990 esta signada por los conflictos mencionados.
+
+```{r}
+gapminder %>% 
+    arrange(expVida) %>% 
+    filter(pais == "Rwanda") %>% head()
+```
+
+?Y la mayor expectativa? Simplemente pedimos un __arrange__ pero al reves.
+
+```{r}
+gapminder %>% arrange(desc(expVida)) %>% head()
+```
+
+Ahi estan los paises con mayor esperanza de vida. Todos del siglo XXI. 
+
+## Contar = count
+
+Sencillamente, el __count__ nos permite realizar un conteo de las variables que queramos. 
+
+Por ejemplo, ?cuantos paises hay por continente?
+
+```{r}
+count(gapminder, continente)
+```
+
+
+## Cambiar el dataframe = spread
+
+A veces necesitamos que cada variable tenga su propia columna, para poder trabajar con ella o realizar determinadas visualizaciones (por ejemplo el _heatmap_). 
+
+Para hacer esto, necesitamos utilizar algo que _extienda_ la base! Esto se obtiene a traves del __spread__. 
+
+Por ejemplo, queremos que cada continente sea una variable que contenga la expectativa de vida. De este modo, utilizamos el spread en el que la variable ( __key__ ) va a ser _continente_ y el valor ( __value__ ), _expVida_. 
+
+```{r}
+extendido <- spread(gapminder, key = continente, value = expVida)
+
+head(extendido)
+```
+
+
+## Exportar y guardar nuestro trabajo
+
+Volvamos al principio y aprendamos a cargar las bases de datos. En este caso, tenemos archivos CSV. 
+
+Si queremos guardar el dataframe que hicimos, por ejemplo el _gapminder_, tenemos que usar __write__. En este caso, vamos a guardarlo como archivo CSV. 
+
+```{r, eval=FALSE}
+write_csv(gapminder, "gapminder.csv")
+```
+
+
+Para traer el dataset, necesitamos usar un __read_csv__. Primero, lo asignamos asi aparece en nuestro Enviroment. Luego, llamamos al csv.
+
+```{r, eval=FALSE}
+gapminder <- read_csv("gapminder.csv")
+```
