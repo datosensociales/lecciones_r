@@ -1,0 +1,279 @@
+---
+title: "Clase 5 - Estructuras de control"
+author: "Sofia Santamarina y Manuel Zapico"
+date: "7/9/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(encoding = "UTF-8")
+```
+
+Hoy vamos a ver las llamadas __estructuras de control__. Estas nos permiten controlar la manera en que se ejecuta nuestro código.
+
+Las estructuras de control establecen condicionales en nuestros código. Por ejemplo, qué condiciones deben cumplirse para realizar una operación o qué debe ocurrir para ejecutar una función.
+
+Esto es de gran utilidad para determinar la lógica y el orden en que ocurren las operaciones, en especial al definir funciones.
+
+Las estructuras de control más usadas en R son las siguientes: 
+
+Estructura de control | Descripción 
+--------------------- | ---------------------
+  if, else            |  Si,de otro modo. Permite decidir si ejecutar o no un fragmento de código a partir una                            condición.
+  for                 |  Para cada uno en. Ejecuta un bucle una cantidad fija de veces
+  while               |  Mientras. Ejecuta un bucle mientras sea verdadera una condición
+  break               |  Interrupción. Detiene la ejecución de un bucle
+  next                |  Siguiente. Salta a la siguiente ejecución de un bucle
+
+
+Hoy nos centraremos en "if, else". 
+Veamos más detalladamente cómo se usan: 
+
+_if_ (si) es usado cuando deseamos que una operación se ejecute únicamente cuando una condición se cumple.
+
+_else_ (de otro modo) es usado para indicarle a R qué hacer en caso de la condición de un if no se cumpla.
+
+Un _if_ es la manera de decirle a R:
+
+SI esta condición es cierta, ENTONCES haz estas operaciones.
+
+```{r eval=FALSE}
+
+if(Condicion) {
+  operaciones_si_la_condicion_es_TRUE
+}
+
+```
+
+
+Si la condición se cumple, es decir, es verdadera (TRUE), entonces se realizan las operaciones. En caso contrario, no ocurre nada y el código con las operaciones no es ejecutado.
+
+
+Por ejemplo, le pedimos a R que nos muestre el texto “Verdadero” si la condición se cumple.
+
+```{r}
+# Se cumple la condición y se muestra "verdadero"
+
+if(4 > 3) {
+  "Verdadero"
+}
+
+```
+
+```{r}
+# No se cumple la condición y no pasa nada
+
+if(4 > 5) {
+  "Verdadero"
+}
+
+```
+
+Para que no suceda esto y nos arroje un resultado cuando la condición no se cumple, usamos el __else__ que complementa un __if__. El _else_ indica qué ocurrirá cuando la condición no se cumple, es falsa (FALSE), en lugar de no hacer nada.
+
+Un if con else es la manera de decirle a R:
+
+_"SI esta condición es es cierta, ENTONCES haz estas operaciones, DE OTRO MODO haz estas otras operaciones"_.
+
+El modelo para un if con un else es:
+
+```{r eval=FALSE}
+if(condición) {
+  operaciones_si_la_condición_es_TRUE
+} else {
+  operaciones_si_la_condición_es_FALSE
+}
+
+```
+
+Usando los ejemplos anteriores, podemos mostrar “Falso” si no se cumple la condición, en lugar de que no ocurra nada.
+
+```{r}
+
+# Se cumple la condición y se muestra "Verdadero"
+if(4 > 3) {
+  "Verdadero"
+} else {
+  "Falso"
+}
+
+
+```
+
+```{r}
+# No se cumple la condición y se muestra "Falso"
+
+if(4 > 5) {
+  "Verdadero"
+} else {
+  "Falso"
+}
+
+```
+
+_Ejercicio_: A partir del dataset "encuesta" del paquete "datos" le pedimos a R que nos muestre aquellas personas consideradas "Muy creyentes" según la cantidad de horas de tv que miran. Es decir, le pedimos a R que nos muestre el texto “Muy creyente” si cumple la condición de mirar más de 4 horas tv religiosa. 
+
+```{r}
+#Primero, cargamos los paquetes de "tidyverse" y "datos" 
+#Luego elegimos el dataset de "encuestas"
+
+library(tidyverse)
+library(datos)
+
+encuesta <- datos::encuesta
+
+encuesta
+```
+
+```{r}
+if(encuesta$horas_tv > 4) print("Muy creyente")
+
+```
+
+Este mensaje nos dice que sólo se usará el primer elemento del vector para evaluar su la condición es verdadera y lo demás será ignorado. 
+
+Para resolver este problema, usamos el __ifelse__ que nos devolverá un valor para cada elemento delvector en el que la condición sea TRUE, y además nos devolverá otro valor para los elementos en que la condición sea FALSE.
+
+Esta función tiene la siguiente forma.
+
+```{r eval=FALSE}
+ifelse(vector, valor_si_TRUE, valor_si_FALSE)
+```
+
+Si intentamos el ejemplo anterior con ifelse(), se nos devolverá un resultado para cada elemento del vector, no sólo del primero de ellos.
+
+```{r}
+
+ifelse(encuesta$horas_tv > 4, "Muy creyente", "Poco creyente") %>% 
+  head(40)
+
+```
+
+```{r}
+#Eliminamos los "NA" 
+
+encuesta <- filter(encuesta, horas_tv != "NA")
+
+ifelse(encuesta$horas_tv > 4, "Muy creyente", "Poco creyente") %>% 
+  head(40)
+
+```
+
+```{r}
+#Ahora veamos el promedio de horas_tv según partido politico de las personas, y averiguemos en cuál partido están los más creyentes. 
+
+#Primero reacomodamos los datos para tener el promedio de horas por partido politico
+
+tv_partido <- encuesta %>% #tomamos el dataset
+              group_by(partido) %>% #agrupamos por partido
+              summarise(prom_tv = round(mean(horas_tv), 2)) %>% #calculamos la media por partido. A la nueva variable la llamamos prom_tv y le pido solo 2 decimales a partir de la funcion "round, 2"
+              arrange(desc(prom_tv)) #ordenamos en forma decreciente
+
+```
+
+Usamos la funcion __"paste0()"__ para que el resultado sea más explicativo. Esta función acepta como argumentos cadenas de texto y las pega (concatena) entre sí, devolviendo como resultado una nueva cadena.
+
+```{r}
+
+#Armamos la condición con "ifelse" ya que se trata de un vector 
+
+{
+  partido <- tv_partido$partido 
+  media <- tv_partido$prom_tv
+  texto <- paste0(partido,  ", " , media, ", ")
+
+ifelse(media > 4,
+    print(paste0(texto, "Muy creyente")), 
+    print(paste0(texto, "Poco creyente")))
+  }
+
+```
+
+Vemos que ningún partido supera el umbral de 4 horas que establecimos, asique calculemos el promedio general y usemos ese dato como umbral. 
+
+```{r}
+umbral <- datos::encuesta
+
+umbral <- filter(umbral, horas_tv != "NA")
+
+mean(umbral$horas_tv) 
+
+
+```
+
+Entonces, el umbral  es de 2.98. Calculemos nuevamente las condiciones con _ifelse_, según partido político y las horas que miran tv. 
+
+```{r}
+{
+  partido <- tv_partido$partido 
+  media <- tv_partido$prom_tv
+  texto <- paste0(partido,  ", " , media, ", ")
+
+ifelse(media >= 2.98,
+    print(paste0(texto, "Muy creyente")), 
+    print(paste0(texto, "Poco creyente")))
+}
+
+```
+
+Podemos concluir que los demócratas (duros o moderados) son más creyentes que los republicanos. 
+
+***
+ifelse es útil para recodificar datos, combiandolo con la funcion **mutate**. 
+
+Creemos una nueva columna que se llame "Tipo_creyente". 
+
+```{r}
+#encuesta <- filter(encuesta, horas_tv != "NA")
+
+encuesta<- encuesta %>% 
+  mutate(Tipo_creyente = ifelse(horas_tv > 2.98, "Muy creyente", "Poco creyente")) 
+
+head(encuesta) 
+
+```
+
+Tenemos una nueva columna que clasifica cada unidad en "Muy creyente" y en "Poco creyente". Pero podriamos refinar aún más la categoria y agregar dos condiciones para clasificar, por ejemplo, a partir de la religión declarada. 
+
+```{r}
+encuesta <- encuesta %>% 
+  mutate(Tipo_creyente = ifelse(horas_tv > 2.98 & religion != "Ninguna", "Muy creyente", "Poco creyente")) 
+
+head(encuesta, 20) 
+```
+Si revisamos los atos, observamos que al valor "religion == Ninguna" le asigna "Poco Creyente", sin importar las "horas_tv". Sin embargo, para ser aun más especificos, deberia ser clasificado con otra categoria, como "Creyente simpatizante". 
+
+Para eso, vamos a utilizar __case_when()__, una función particularmente útil dentro de mutate para crear una nueva variable que dependa de una combinación compleja de variables existentes.
+```{r}
+
+encuesta <- encuesta %>% 
+  mutate(Tipo_creyente = case_when(religion == "Ninguna" ~ "Creyente Simpatizante", 
+                                   horas_tv >= 2.98 ~ "Muy creyente",
+                                   TRUE ~ "Poco creyente")) #TRUE es equivalente al "else" 
+
+head(encuesta, 20)
+
+```
+
+Tenemos 3 categorias para "Tipo_creyente". Pero aun asi, no todos los "Creyentes Simpatizantes" son iguales, ya que algunos miran muchas más horas de tv que otros. Calculamos el promedio de horas de tv que mira este sub conjunto de personas. 
+
+```{r}
+simpatizantes <- encuesta %>% 
+  filter(Tipo_creyente == "Creyente Simpatizante")
+
+mean(simpatizantes$horas_tv)
+```
+
+```{r}
+encuesta <- encuesta %>% 
+  mutate(Tipo_creyente = case_when(religion == "Ninguna" & horas_tv >= 2.7 ~ "Simpatizante comprometido", 
+                                   religion == "Ninguna" & horas_tv <= 2.7 ~ "Simpatizante debil",
+                                   religion != "Ninguna" & horas_tv >= 2.98 ~ "Muy creyente",
+                                   religion != "Ninguna" & horas_tv <= 2.98 ~ "Poco creyente"))
+
+head(encuesta, 30)
+```
+
+Finalmente, tenemos 4 "Tipo_creyente" según la religión que practica y la cantidad de "horas_tv" que mira. 
+
