@@ -1,0 +1,90 @@
+---
+title: "Tidy Data"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, cache = TRUE)
+library(tidyverse)
+```
+
+## Dataset 1
+
+```{r}
+raw <- read_csv("raw.csv")
+knitr::kable(raw[1:6,1:10])
+```
+
+# ¿Cuáles son las variables en este dataset?  
+Discutir con un compañero durante un minuto
+
+## La solución
+
+Arreglar este problema es fácil. Usamos `gather`, de `tidyr` con tres argumentos:  
+
+- El dataset  
+- El nombre de la nueva variable `key`  
+- El nombre de la nueva variable `value`
+
+```{r, echo=TRUE}
+tidy <- gather(data = raw, 
+               key = income, 
+               value = cant, 
+               -reltrad)
+```
+
+## Antes
+
+```{r}
+knitr::kable(raw[,1:10])
+```
+
+## Después
+
+```{r}
+knitr::kable(tidy)
+```
+
+# Múltiples variables en una columna
+
+## 
+
+```{r}
+raw2 <- read_csv("raw2.csv")
+knitr::kable(raw2)
+```
+
+# ¿Cuáles son las variables en este dataset?
+Discutir con un compañero durante un minuto  
+Pista: f = female, 1524 = 15 a 24
+
+## La solución
+
+Volvemos a usar `gather` y ahora también vamos a necesitar `separate`
+
+```{r, echo=TRUE}
+tidy2 <- raw2 %>% 
+  gather(key = sex_age, value = cant, -state) %>% 
+  separate(col = sex_age, into = c("sex", "age_range"), sep = 1)
+```
+
+## Antes
+
+```{r}
+knitr::kable(raw2)
+```
+
+## Intermedio (gather)
+
+```{r}
+raw2 %>% 
+  gather(key = sex_age, value = cant, -state) %>% 
+  knitr::kable()
+```
+
+## Después (separate)
+
+```{r}
+knitr::kable(tidy2)
+```
+
