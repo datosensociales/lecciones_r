@@ -1,0 +1,241 @@
+---
+title: "Tidy Data"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, cache = TRUE)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+```
+
+```{r}
+my_scrolling_table <- function(x) {
+  x %>% 
+    kable() %>% 
+    kable_styling() %>%
+    scroll_box(width = "100%", height = "500px")
+}
+```
+
+
+## Dataset 1
+
+```{r}
+raw <- read_csv("raw.csv")
+# knitr::kable(raw[1:6,1:10])
+raw %>% 
+  my_scrolling_table()
+```
+
+# ¿Cuáles son las variables en este dataset?  
+Discutir con un compañero durante un minuto
+
+## La solución
+
+Arreglar este problema es fácil. Usamos `gather`, de `tidyr` con tres argumentos:  
+
+- El dataset  
+- El nombre de la nueva variable `key`  
+- El nombre de la nueva variable `value`
+
+```{r, echo=TRUE}
+tidy <- gather(data = raw, 
+               key = income, 
+               value = cant, 
+               -reltrad)
+```
+
+## Antes
+
+```{r}
+raw %>% 
+  my_scrolling_table()
+```
+
+## Después
+
+```{r}
+tidy %>% 
+  my_scrolling_table()
+```
+
+# Múltiples variables en una columna
+
+## 
+
+```{r}
+raw2 <- read_csv("raw2.csv")
+raw2 %>% 
+  my_scrolling_table()
+```
+
+# ¿Cuáles son las variables en este dataset?
+Discutir con un compañero durante un minuto  
+Pista: f = female, 1524 = 15 a 24
+
+## La solución
+
+Volvemos a usar `gather` y ahora también vamos a necesitar `separate`
+
+```{r, echo=TRUE}
+tidy2 <- raw2 %>% 
+  gather(key = sex_age, value = cant, -state) %>% 
+  separate(col = sex_age, into = c("sex", "age_range"), sep = 1)
+```
+
+## Antes
+
+```{r}
+raw2 %>% 
+  my_scrolling_table()
+```
+
+## Intermedio (gather)
+
+```{r}
+raw2 %>% 
+  gather(key = sex_age, value = cant, -state) %>% 
+  my_scrolling_table()
+```
+
+## Después (separate)
+
+```{r}
+tidy2 %>% 
+  my_scrolling_table()
+```
+
+# Variables en filas y columnas
+
+## 
+
+```{r}
+raw3 <- read_csv("raw3.csv")
+
+raw3 %>% 
+  my_scrolling_table()
+```
+
+# ¿Cuáles son las variables en este dataset?
+
+Discutir 1 minuto con une compañere  
+Pistas:   
+- TMIN = temperatura mínima  
+- id = identificador de estación atmosférica
+
+## Solución
+
+Para reunir los valores de la variable `day` usamos `gather`.  
+Y para expandir las variables `tmax` y `tmin` usamos `spread`.
+Luego, utilizo `mutate` y `str_remove` para eliminar la 'd' en los valores de la variable `day` y `arrange` para ordernar por `year`, `month`, `day` e `id`
+
+```{r, echo=TRUE}
+tidy3 <- raw3 %>% 
+  gather(key = "day",
+         value = "temp", 
+         d1:d12) %>% 
+  spread(key = element,
+         value = temp) %>% 
+  mutate(day = as.numeric(str_remove(day, "d"))) %>% 
+  arrange(year, month, day, id)
+```
+
+## Antes
+
+```{r}
+raw3 %>% 
+  my_scrolling_table()
+```
+
+## Intermedio (gather)
+
+```{r, echo=TRUE}
+raw3 %>% 
+  gather(key = "day",
+         value = "temp", 
+         d1:d12) %>% 
+  my_scrolling_table()
+```
+
+## Después (spread)
+
+```{r, echo=TRUE}
+raw3 %>% 
+  gather(key = "day",
+         value = "temp", 
+         d1:d12) %>% 
+  spread(key = element,
+         value = temp) %>% 
+  my_scrolling_table()
+```
+
+## Después II (mutate y arrange)
+
+```{r}
+raw3 %>% 
+  gather(key = "day",
+         value = "temp", 
+         d1:d12) %>% 
+  spread(key = element,
+         value = temp) %>% 
+  mutate(day = as.numeric(str_remove(day, "d"))) %>% 
+  arrange(year, month, day, id) %>% 
+  my_scrolling_table()
+```
+
+# Múltiples tipos en la misma tabla
+
+##  
+
+```{r}
+raw4 <- read_csv("raw4.csv")
+
+raw4 %>% 
+  my_scrolling_table
+```
+
+## Primera limpieza
+
+```{r, echo=TRUE}
+raw4 %>% 
+  gather(semana, rank, x1st.week:x76th.week) %>% 
+  mutate(semana = as.numeric(str_extract(semana, "[0-9]+"))) %>% 
+  arrange(track, semana) %>% 
+  my_scrolling_table()
+```
+
+# ¿Cuál es mi unidad de observación en esta tabla?
+
+¿Es la canción? ¿Es canción-semana?  
+¿Cuántas unidades de observación hay?
+Discutan con un compañere durante un minuto
+
+## Normalización
+
+Cada hecho sobre una canción se repite muchas veces. Señal que muchos tipos de unidades experimentales están en la misma tabla. Podemos guardar nuestros datos más eficientemente separándolos en distintas tablas para cada tipo de unidad.  
+  
+Necesitamos dividir la tabla en dos: una tabla "canción" y una tabla "ranking"
+
+## Tabla 1: canción
+
+```{r}
+raw4 %>% 
+  select(year:date.peaked) %>% 
+  unique() %>% 
+  my_scrolling_table()
+```
+
+## Tabla2: ranking
+
+```{r}
+raw4 %>% 
+  gather(semana, rank, x1st.week:x76th.week) %>% 
+  mutate(semana = as.numeric(str_extract(semana, "[0-9]+"))) %>% 
+  arrange(track, semana) %>% 
+  select(track, semana, rank) %>% 
+  na.omit() %>% 
+  my_scrolling_table()
+```
+
